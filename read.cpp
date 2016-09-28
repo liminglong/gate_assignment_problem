@@ -436,8 +436,7 @@ int main()
 	copy(c.begin(), c.end(), ostream_iterator <int> (cout, " "));  */
 		
 	
-    mytime leaving_time[713];//when the airplane is leaving.
-	
+        mytime leaving_time[713];//it stores the information about when the airplane is leaving, i.e. the gate positon number.
 	//initialise leaving_time
 	for(int i=0; i< 714; i++)
 	{
@@ -449,20 +448,66 @@ int main()
         leaving_time.year = 0;
 	}
 	
-	
-	//liminglong, TODO: use greedy algorithm to calculate the result of the "obj" function.
-    for(int flight_index = 1001; flight_index < 1700; flight_index++)//The flight number is from 1011 to 1699.
-    {
-    	for(int position_index = 101; position_index < 713; position_index++)//The gate position number of the airport is from 101 to 712.
-    	{
-		    if(  ( (leaving_time[position_index]+8) < mapin[flight_index] )
-	           &&( == maptype[flight_index])		  
-			  )
-			{
-				leaving_time[position_index] = mapout[flight_index]//use a new leaving time of this flight to update the leaving_time
-			}
-		      
-		}
+	vector<int> solution;//The flight number is the index, and the gate position number is the value, if none, value is 0.
+	//initialising the solution, the default value is 0, which denotes that no proper gate position is found.
+	for(i = 0; i < 1700; i++)
+	{
+	    solution.push_back(0);
 	}
+	
+	//liminglong, use greedy algorithm to calculate the result of the "obj" function.
+        for(int flight_index = 1001; flight_index < 1700; flight_index++)//The flight number is from 1011 to 1699.
+        {
+            set<int> temp_set;//temp_set stores all the gate position number which satisfy the conditions.
+            temp_set =   typemap[maptype[flight_index]] 
+                       < taskmap[maptask[flight_index]] 
+                       < companymap[mapcompany[flight_index]];//the intersection result of different sets.
+            if(mapguoji[flight_index])
+                temp_set = guojiset < temp_set;
+            else 
+                temp_set = guoneiset < temp_set;
+                
+            if(temp_set.empty())
+            {
+                solution[flight_index] = 0;
+                continue;
+            }
+            else
+            {
+                set<int>::iterator it;
+                bool jin_flag = false;
+                bool found_flag = false;
+                for(it = temp_set.begin(); it != temp_set.end(); it++)
+                {
+                    if(((leaving_time[*it]+8) < mapin[flight_index]) && (yunjinmap[*it] == true))
+                    {
+                        leaving_time[*it] = mapout[flight_index];
+                        solution[flight_index] = *it;
+                        jin_flag = true;
+                        found_flag = true;
+                        break;
+                    }
+                }
+                if(jin_flag == false)
+                {
+                    for(it = temp_set.begin(); it != temp_set.end(); it++)
+                    {
+                        if(((leaving_time[*it]+8) < mapin[flight_index]))
+                        {
+                            leaving_time[*it] = mapout[flight_index];
+                            solution[flight_index] = *it;
+                            jin_flag = false;
+                            found_flag = true;
+                            break;
+                        }
+                    }
+                }
+                if(found_flag == false)
+                {
+                    solution[flight_index] = 0;
+                }
+	    }	     	
+	}    
+	//solution to obj ? what is the index number?
 	
  } 

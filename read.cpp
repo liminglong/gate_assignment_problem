@@ -212,6 +212,9 @@ double obj(vector<int> s)//Ä¿±êº¯Êý
 		huadaotime[huadao].push_back(mapin[flightNO[i]]);
 		huadaotime[huadao].push_back(mapout[flightNO[i]]);
 	}
+	std::cout << "Gate position attachment: " << 3.0*allocated / total / 3.0 << std::endl;
+	cout << "Near the gate position: " << 2.0*near / total / 2.0 << endl;
+	cout << "Sliding way does not collide: " << 1.0*(1- collision / (double)total) << endl;
 	return 3.0*allocated / total + 2.0*near / total + 1.0*(1- collision / (double)total) ;
 }
 
@@ -438,25 +441,26 @@ int main()
 	
         mytime leaving_time[713];//it stores the information about when the airplane is leaving, i.e. the gate positon number.
 	//initialise leaving_time
-	for(int i=0; i< 714; i++)
+	for(int gate_position_index = 0; gate_position_index < 714; gate_position_index++)
 	{
-        leaving_time.day = 0;
-        leaving_time.hour = 0;
-        leaving_time.minute = 0;
-        leaving_time.month = 0;
-        leaving_time.second = 0;
-        leaving_time.year = 0;
+        leaving_time[gate_position_index].day = 0;
+        leaving_time[gate_position_index].hour = 0;
+        leaving_time[gate_position_index].minute = 0;
+        leaving_time[gate_position_index].month = 0;
+        leaving_time[gate_position_index].second = 0;
+        leaving_time[gate_position_index].year = 0;
 	}
 	
-	vector<int> solution;//The flight number is the index, and the gate position number is the value, if none, value is 0.
-	//initialising the solution, the default value is 0, which denotes that no proper gate position is found.
-	for(i = 0; i < 1700; i++)
+	vector<int> temp_solution;//The flight number is the index, and the gate position number is the value, if none, value is 0.
+	//initialising the temp_solution, the default value is 0, which denotes that no proper gate position is found.
+	for(int flight_index = 0; flight_index < 1700; flight_index++)
 	{
-	    solution.push_back(0);
+	    temp_solution.push_back(0);
 	}
 	
 	//liminglong, use greedy algorithm to calculate the result of the "obj" function.
         for(int flight_index = 1001; flight_index < 1700; flight_index++)//The flight number is from 1011 to 1699.
+        //for(int flight_index = 1699; flight_index > 1000; flight_index--)
         {
             set<int> temp_set;//temp_set stores all the gate position number which satisfy the conditions.
             temp_set =   typemap[maptype[flight_index]] 
@@ -469,7 +473,7 @@ int main()
                 
             if(temp_set.empty())
             {
-                solution[flight_index] = 0;
+                temp_solution[flight_index] = 0;
                 continue;
             }
             else
@@ -479,10 +483,10 @@ int main()
                 bool found_flag = false;
                 for(it = temp_set.begin(); it != temp_set.end(); it++)
                 {
-                    if(((leaving_time[*it]+8) < mapin[flight_index]) && (yunjinmap[*it] == true))
+                    if(((leaving_time[*it]+8) < mapin[flight_index]) && (yuanjinmap[*it] == true))
                     {
                         leaving_time[*it] = mapout[flight_index];
-                        solution[flight_index] = *it;
+                        temp_solution[flight_index] = *it;
                         jin_flag = true;
                         found_flag = true;
                         break;
@@ -495,7 +499,7 @@ int main()
                         if(((leaving_time[*it]+8) < mapin[flight_index]))
                         {
                             leaving_time[*it] = mapout[flight_index];
-                            solution[flight_index] = *it;
+                            temp_solution[flight_index] = *it;
                             jin_flag = false;
                             found_flag = true;
                             break;
@@ -504,10 +508,16 @@ int main()
                 }
                 if(found_flag == false)
                 {
-                    solution[flight_index] = 0;
+                    temp_solution[flight_index] = 0;
                 }
 	    }	     	
 	}    
-	//solution to obj ? what is the index number?
-	
+	//temp_solution to obj ? what is the index number?
+	vector<int> final_solution;
+	for(int flight_index = 1001; flight_index < 1700; flight_index ++)
+	{
+	    final_solution.push_back(temp_solution[flight_index]);
+	}
+	std::cout << "The result is: " << obj(final_solution) << std::endl;
+	return 0;
  } 
